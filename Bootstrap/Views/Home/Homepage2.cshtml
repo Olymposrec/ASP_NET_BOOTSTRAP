@@ -1,0 +1,348 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Homepage2</title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet" />
+
+    <script src="~/Scripts/jquery-3.5.1.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+</head>
+<body>
+    <div>
+
+        @Html.ActionLink("Homepage", "Homepage") <br />
+        @Html.ActionLink("Homepage2", "Homepage2") <br />
+        @Html.ActionLink("Homepage3", "Homepage3")
+    </div>
+    <hr />
+    <div>
+        <h2>Home Page2</h2>
+        <hr />
+    </div>
+    <div class="container-fluid">
+        @*HEADER*@
+        <div class="row">
+            <div class="col-xs-12">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <div class="navbar-header">
+                            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu" aria-expanded="false">
+                                <span class="sr-only">Toggle navigation</span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                                <span class="icon-bar"></span>
+                            </button>
+                            <a class="navbar-brand" href="/Home/Homepage">Blog Sitesi</a>
+                        </div>
+                        <div class="collapse navbar-collapse" id="menu">
+                            <ul class="nav navbar-nav">
+                                <li><a href="/Home/Homepage">Page1</a></li>
+                                <li><a href="/Home/Homepage2">Page2</a></li>
+                                <li><a href="/Home/Homepage3">Page3</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        @*BODY*@
+        <div class="row">
+
+            <div class="col-md-10">
+                <h2>Makaleler</h2>
+                <hr />
+                <div class="panel panel-default">
+                    <div class="panel-heading">Bu Projemizin Mantığı, Amacı Ve Kullanılanlar</div>
+                    <div class="panel-body">
+                        <p>Klasik başlangıcımız yaparak öncelikle yeni bir ASP.NET Boş Template kurduktan sonra MVC olarak yeni bir proje açıyoruz.</p>
+                        <p>Ardından gelen kısımlar ise sırasıyla Solution Explorer' dan nuget pack elemanlarımızı projemize include ediyoruz.</p>
+                        <p>Bunlar tabiki dünyaca tanınmış Framework, Bootstrap' i projemize eklemek olacak.</p>
+                        <p>Ardından takip etmemiz gereken kısımlar ise Bootstrap' te işimize yaracak kodları bulabilmek için <a href="https://getbootstrap.com/docs/3.4/components/" class="label label-warning">Bu Siteden</a> işinize yaracağını düşündüğünüz elementleri kopyala yapıştır ilkesi ile internet sitenize yapıştırın.(HTML sayfanızın içine)</p>
+                        <p>Ardından gerekli yazıları yerlerine yerleştirdiğiniz zaman bunun gibi bir site ile karşılaşacaksınız.</p>
+                        <a href="https://github.com/Olymposrec" class="btn btn-info btn-xs">Github'a git</a>
+                    </div>
+                    <div class="panel-footer">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            @MyHelperMethods.Tag(text: "tag" + i.ToString())
+                        }
+                    </div>
+                </div>
+                <hr />
+                <div class="panel panel-default">
+                    <div class="panel-heading">Projeye Eklenen Yeni Kodlar</div>
+                    <div class="panel-body">
+                        <p>Evet Homepage2' nin içerisine bazı kodlar ile kolay yoldan HTML kodları oluşturduk.</p>
+                        <p>Bunun için Tagbuilder, yeni klasör "Library", yeni model "Message" tarzı dosyalar ekledik.</p>
+                        <p>Bunların anlatımını Github' da wiki olarak hazırlamayı düşünüyorum burada sadece örnek olarak göstereceğim.</p>
+                        <p>Aşağıdaki kodlar bizim MyExtensions.cs dosyamızın içerisine eklediğimiz kodlardır:</p>
+                        <pre>
+            public static MvcHtmlString Alert(this HtmlHelper helper,string id="alert1",string color="success",string text="")
+        {
+            TagBuilder tag = new TagBuilder("div");
+            tag.AddCssClass("alert alert-" + color);
+            tag.GenerateId(id);
+            tag.Attributes.Add(new KeyValuePair<"string, string>("role", "alert"));
+            tag.SetInnerText(text);
+            return MvcHtmlString.Create(tag.ToString());
+        }
+            public static MvcHtmlString AlertFor<"TModel,TProperty>(this HtmlHelper<"TModel> helper,System.Linq.Expressions.Expression<Func<TModel,TProperty>>expression,object htmlAttributes)
+        {
+            TagBuilder tag = new TagBuilder("div");
+            tag.AddCssClass("alert");
+            tag.Attributes.Add(new KeyValuePair<"string, string>("role", "alert"));
+            var valueGetter = expression.Compile();
+            var message = valueGetter(helper.ViewData.Model) as Message;
+            if (message.Id == Guid.Empty) message.Id = new Guid();
+            if (message.Level < 1) message.Level = 1;
+            if (message.Level > 4) message.Level = 4;
+
+            switch(message.Level)
+            {
+                case 1:
+                    tag.AddCssClass("alert-success");
+                    break;
+                case 2:
+                    tag.AddCssClass("alert-info");
+                    break;
+                case 3:
+                    tag.AddCssClass("alert-warning");
+                    break;
+                case 4:
+                    tag.AddCssClass("alert-danger");
+                    break;
+                default:
+                    break;
+
+            }
+            tag.MergeAttributes(new System.Web.Routing.RouteValueDictionary(htmlAttributes));
+            tag.GenerateId(message.Id.ToString());
+            tag.SetInnerText(message.Text);
+            return MvcHtmlString.Create(tag.ToString());
+        }
+</pre>
+                        <p>Yukarıdaki kodlarda bahsedilen "Message" objesine ait kodlar ise aşağıda:</p>
+                        <pre>
+    public class Message
+    {
+        public Guid Id { get; set; }
+        public int Level { get; set; }
+        public string Text { get; set; }
+    }
+</pre>
+                        <p>Controller' ımıza yazdığımız kodlara aşağıdan ulaşabilirsiniz:</p>
+                        <pre>
+        public ActionResult Homepage()
+        {
+            return View();
+        }
+        public ActionResult Homepage2()
+        {
+            return View();
+        }
+        public ActionResult Homepage3()
+        {
+            List<Message> messages = new List<Message>();
+            messages.Add(new Message() { Level = 1, Text = "Uyarı Düzeyi 1" });
+            messages.Add(new Message() { Level = 2, Text = "Uyarı Düzeyi 2" });
+            messages.Add(new Message() { Level = 3, Text = "Uyarı Düzeyi 3" });
+            messages.Add(new Message() { Level = 4, Text = "Uyarı Düzeyi 4" });
+            return View(messages);
+        }
+</pre>
+                        <p>Helper Method olarak oluşturduğumuz kodlar aşağıdadır:</p>
+                        <pre>
+
+helper Input(string name, string typ, string val)
+{
+                        input name="name" id="name" type="typ" value="val" />
+
+}
+
+helper Table(string name, int rows, int columns, params string[] headers)
+{
+                        table id="name" name="name" border="1">
+                        tr>
+            for (int i = 0; i < columns; i++)
+            {
+                        th>
+                    headers[i]
+                /th>
+            }
+        /tr>
+        for (int i = 0; i < rows; i++)
+        {
+                        tr>
+                for (int k = 0; k < columns; k++)
+                {
+                        td>
+                        ("("+k.ToString()+","+i.ToString()+")")
+                    /td>
+                }
+            /tr>
+        }
+    /table>
+}
+
+helper AButton(string css = "warning", string name = "button1", string size = "xs", string val = "", string href = "#")
+{
+                        a id="name" name="name" href="href" class="btn btn-css btn-size">val/a>
+}
+
+helper LinkList(string name, params string[] linktexts)
+{
+                        ul id="name" name="name">
+        for (int i = 0; i < linktexts.Length; i++)
+        {
+                       li>
+                       a href="#">linktexts[i]/a>
+            /li>
+        }
+    /ul>
+
+}
+
+helper Tag(string css = "warning", string text = " ")
+{
+                        span class="label label-css">text/span>:
+}
+
+</pre>
+                        <p> Yukarıda bir çok kod paylaştık şimdi<a href="https://bootsnipp.com/snippets/oPgeG" class="label label-warning">Bu Siteden</a> kullanabileceğiniz CSS kodlarına ulaşabilirsiniz. </p>
+                        
+                        <a href="https://github.com/Olymposrec" class="btn btn-info btn-xs">Github'a git</a>
+                    </div>
+                    <div class="panel-footer">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            @MyHelperMethods.Tag(text: "tag" + i.ToString())
+                        }
+                    </div>
+                </div>
+                <hr />
+                <div class="panel panel-default">
+                    <div class="panel-heading">Panel heading without title</div>
+                    <div class="panel-body">
+                        <p>Ut fusce varius nisl ac ipsum gravida vel pretium tellus tincidunt integer eu augue augue nunc elit dolor, luctus placerat.</p>
+                        <p>Scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</p>
+                        <p>Placerat suscipit, orci nisl iaculis eros, a tincidunt nisi odio eget lorem nulla condimentum tempor mattis ut vitae feugiat augue.</p><br />
+                        <a href="#" class="btn btn-info btn-xs">more</a>
+                    </div>
+                    <div class="panel-footer">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            @MyHelperMethods.Tag(css: "success", text: "tag" + i.ToString())
+                        }
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Panel heading without title</div>
+                    <div class="panel-body">
+                        <p>Ut fusce varius nisl ac ipsum gravida vel pretium tellus tincidunt integer eu augue augue nunc elit dolor, luctus placerat.</p>
+                        <p>Scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</p>
+                        <p>Placerat suscipit, orci nisl iaculis eros, a tincidunt nisi odio eget lorem nulla condimentum tempor mattis ut vitae feugiat augue.</p><br />
+                        <a href="#" class="btn btn-info btn-xs">more</a>
+                    </div>
+                    <div class="panel-footer">
+                        @for (int i = 0; i < 3; i++)
+                        {
+                            @MyHelperMethods.Tag(css: "primary", text: "tag" + i.ToString())
+                        }
+                    </div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Panel heading without title</div>
+                    <div class="panel-body">
+                        <p>Ut fusce varius nisl ac ipsum gravida vel pretium tellus tincidunt integer eu augue augue nunc elit dolor, luctus placerat.</p>
+                        <p>Scelerisque euismod, iaculis eu lacus nunc mi elit, vehicula ut laoreet ac, aliquam sit amet justo nunc tempor, metus vel.</p>
+                        <p>Placerat suscipit, orci nisl iaculis eros, a tincidunt nisi odio eget lorem nulla condimentum tempor mattis ut vitae feugiat augue.</p><br />
+                        <a href="#" class="btn btn-info btn-xs">more</a>
+                    </div>
+                    <div class="panel-footer">
+                        <span class="label label-warning">Tag1</span>&nbsp;
+                        <span class="label label-warning">Tag2</span>&nbsp;
+                        <span class="label label-warning">Tag3</span>&nbsp;
+                        <span class="label label-warning">Tag4</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-2">
+                <h2>Kategoriler</h2>
+                <hr />
+                @MyHelperMethods.LinkList("list1", "Kategori", "Kategori", "Kategori", "Kategori")
+            </div>
+
+        </div>
+        @*FOOTER*@
+        <div class="row">
+            <hr />
+
+
+            <div class="col-md-4">
+                <ul class="small">
+                    <li>
+                        <a href="#">Dolor sit.</a>
+                    </li>
+                    <li>
+                        <a href="#">Amet, consectetur.</a>
+                    </li>
+                    <li>
+                        <a href="#">Adipiscing elit.</a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="col-md-4">
+                <ul class="small">
+                    <li>
+                        <a href="#">Dolor sit.</a>
+                    </li>
+                    <li>
+                        <a href="#">Amet, consectetur.</a>
+                    </li>
+                    <li>
+                        <a href="#">Adipiscing elit.</a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="col-md-4">
+                <ul class="small">
+                    <li>
+                        <a href="#">Dolor sit.</a>
+                    </li>
+                    <li>
+                        <a href="#">Amet, consectetur.</a>
+                    </li>
+                    <li>
+                        <a href="#">Adipiscing elit.</a>
+                    </li>
+                </ul>
+            </div>
+
+
+            <div class="col-xs-12 text-center">
+                <span class="small">
+                    Tüm Hakları Saklıdır &copy;
+                </span>
+            </div>
+            <hr />
+        </div>
+
+    </div>
+
+
+</body>
+</html>
